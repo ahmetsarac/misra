@@ -1,0 +1,32 @@
+<resources>
+    <string name="app_name">Mısra</string>
+    <string name="new_song">New song</string>
+    <string name="song_title">Title</string>
+    <string name="back">Back</string>
+    <string name="empty_library">Tap + to start a song</string>
+    <string name="write_a_lyric">Write a lyric…</string>
+    <string name="add_audio">Audio</string>
+    <string name="record">Record</string>
+    <string name="duplicate">Duplicate</string>
+    <string name="delete">Delete</string>
+    <string name="cancel">Cancel</string>
+    <string name="delete_song_body">Lyrics and voice notes will be removed from this device.</string>
+    <plurals name="songs_selected">
+        <item quantity="one">%d selected</item>
+        <item quantity="other">%d selected</item>
+    </plurals>
+    <plurals name="delete_songs_title">
+        <item quantity="one">Delete song?</item>
+        <item quantity="other">Delete %d songs?</item>
+    </plurals>
+    <string name="pause">Pause</string>
+    <string name="resume">Resume</string>
+    <string name="stop">Stop</string>
+    <string name="discard">Discard</string>
+    <string name="play">Play</string>
+    <string name="volume">Volume</string>
+    <string name="drag_block">Move</string>
+    <string name="resize_block">Resize</string>
+    <string name="audio_missing">Audio file is missing.</string>
+    <string name="mic_permission">Microphone access is needed to record.</string>
+</resources>
