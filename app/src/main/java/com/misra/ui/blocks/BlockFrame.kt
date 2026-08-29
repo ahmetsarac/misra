@@ -37,11 +37,11 @@ private val CardCorner = 12.dp
 fun BlockRow(
     selected: Boolean,
     ink: Color,
-    fillColor: Color = Color.Transparent,
     onDragStart: () -> Unit,
     onVerticalDrag: (Float) -> Unit,
     onDragEnd: () -> Unit,
     modifier: Modifier = Modifier,
+    fillColor: Color = Color.Transparent,
     content: @Composable () -> Unit
 ) {
     Row(

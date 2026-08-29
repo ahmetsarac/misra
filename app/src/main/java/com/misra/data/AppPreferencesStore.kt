@@ -1,6 +1,7 @@
 package com.misra.data
 
 import android.content.Context
+import androidx.core.content.edit
 import com.misra.domain.model.LyricFontSize
 
 class AppPreferencesStore(context: Context) {
@@ -11,7 +12,9 @@ class AppPreferencesStore(context: Context) {
         LyricFontSize.coerce(prefs.getFloat(KEY_LYRIC_FONT_SIZE, LyricFontSize.DefaultSp))
 
     fun setLyricFontSizeSp(value: Float) {
-        prefs.edit().putFloat(KEY_LYRIC_FONT_SIZE, LyricFontSize.coerce(value)).apply()
+        prefs.edit {
+            putFloat(KEY_LYRIC_FONT_SIZE, LyricFontSize.coerce(value))
+        }
     }
 
     private companion object {

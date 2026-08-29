@@ -37,6 +37,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlin.time.Duration.Companion.milliseconds
 
 data class CursorRange(val start: Int = 0, val end: Int = 0)
 
@@ -360,7 +361,8 @@ class WorkspaceViewModel(
 
     private fun deleteAudio(id: String) {
         val block = _document.value.block(id) ?: return
-        if (block.payload !is BlockPayload.Audio) return
+        val audio = block.payload
+        if (audio !is BlockPayload.Audio) return
         if (_playback.value.blockId == id) {
             stopPlayback()
         }
@@ -369,7 +371,6 @@ class WorkspaceViewModel(
             .lastOrNull { it.payload is BlockPayload.Text }
         val cursor = (previousText?.payload as? BlockPayload.Text)?.content?.length ?: 0
         _document.value = _document.value.removeAudio(id, now())
-        val audio = block.payload as BlockPayload.Audio
         val stillUsed = _document.value.blocks.any { other ->
             val payload = other.payload as? BlockPayload.Audio
             payload?.audioId == audio.audioId
@@ -405,7 +406,7 @@ class WorkspaceViewModel(
         playbackTicker = viewModelScope.launch {
             while (isActive && player.isPlaying) {
                 _playback.update { it.copy(positionMs = player.positionMs, isPlaying = true) }
-                delay(80)
+                delay(80.milliseconds)
             }
         }
     }
@@ -415,7 +416,7 @@ class WorkspaceViewModel(
         recordingTicker = viewModelScope.launch {
             while (isActive && _recording.value.active && !_recording.value.isPaused) {
                 _recording.update { it.copy(elapsedMs = recorder.elapsedMs) }
-                delay(100)
+                delay(100.milliseconds)
             }
         }
     }
@@ -455,7 +456,7 @@ class WorkspaceViewModel(
     private fun scheduleSave() {
         val generation = ++saveGeneration
         viewModelScope.launch {
-            delay(450)
+            delay(450.milliseconds)
             if (generation == saveGeneration) {
                 withContext(Dispatchers.IO) { songStore.save(_document.value) }
             }

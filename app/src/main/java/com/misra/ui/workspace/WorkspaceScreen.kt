@@ -27,6 +27,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.misra.domain.model.SongDocument
 import kotlinx.coroutines.delay
+import kotlin.time.Duration.Companion.milliseconds
 
 @Composable
 fun WorkspaceRoute(
@@ -54,7 +55,7 @@ fun WorkspaceRoute(
 
     LaunchedEffect(interaction.userMessage) {
         if (interaction.userMessage != null) {
-            delay(2400)
+            delay(2400.milliseconds)
             viewModel.consumeMessage()
         }
     }
