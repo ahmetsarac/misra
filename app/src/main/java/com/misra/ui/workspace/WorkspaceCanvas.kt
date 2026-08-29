@@ -33,6 +33,8 @@ import com.misra.domain.model.SongDocument
 import com.misra.ui.blocks.AudioBlockView
 import com.misra.ui.blocks.AudioDropPlaceholder
 import com.misra.ui.blocks.TextBlockView
+import com.misra.domain.workspace.hidesBlankSlot
+import com.misra.domain.workspace.isLyricText
 
 @Composable
 fun WorkspaceDocument(
@@ -55,13 +57,24 @@ fun WorkspaceDocument(
     val density = LocalDensity.current
     val swapThreshold = with(density) { 36.dp.toPx() }
     val dragElevation = with(density) { 10.dp.toPx() }
-    var dragAccum by remember { mutableFloatStateOf(0f) }
+    var nudgeAnchor by remember { mutableFloatStateOf(0f) }
     var draggingId by remember { mutableStateOf<String?>(null) }
     var dragStartY by remember { mutableFloatStateOf(0f) }
     var fingerDelta by remember { mutableFloatStateOf(0f) }
     val layoutYs = remember { mutableStateMapOf<String, Float>() }
     val tapSource = remember { MutableInteractionSource() }
-    val lastTextId = document.blocks.lastOrNull { it.payload is BlockPayload.Text }?.id
+
+    // Blank slots stay visible while a block is held so the list does not reflow under the finger.
+    val collapsesBlanks = draggingId == null
+    fun hidden(index: Int) = collapsesBlanks && document.hidesBlankSlot(index)
+
+    val lastTextId = document.blocks.indices.reversed().firstOrNull { index ->
+        document.blocks[index].payload is BlockPayload.Text && !hidden(index)
+    }?.let { document.blocks[it].id }
+
+    val isEmptySheet = document.blocks.none {
+        it.isLyricText() || it.payload is BlockPayload.Audio
+    }
 
     Box(
         modifier = modifier
@@ -80,86 +93,95 @@ fun WorkspaceDocument(
                 .padding(start = 8.dp, end = 20.dp, top = 88.dp, bottom = 96.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-        document.blocks.forEach { block ->
-            key(block.id) {
-                when (val payload = block.payload) {
-                    is BlockPayload.Text -> TextBlockView(
-                        payload = payload,
-                        restoreFocusGen = interaction.restoreFocusGen,
-                        isRestoreTarget = interaction.activeTextId == block.id,
-                        fillsCanvas = block.id == lastTextId,
-                        cursor = interaction.cursors[block.id]
-                            ?: CursorRange(payload.content.length, payload.content.length),
-                        onSelect = { onSelectText(block.id) },
-                        onTextChange = { onTextChange(block.id, it) },
-                        onCursorChange = { start, end -> onCursorChange(block.id, start, end) },
-                        onBackspaceAtStart = { onBackspaceAtStart(block.id) },
-                        modifier = Modifier.fillMaxWidth()
-                    )
-
-                    is BlockPayload.Audio -> {
-                        val dragging = draggingId == block.id
-                        val translationY = if (dragging) {
-                            dragStartY + fingerDelta - (layoutYs[block.id] ?: dragStartY)
-                        } else {
-                            0f
-                        }
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .zIndex(if (dragging) 1f else 0f)
-                                .onGloballyPositioned { coords ->
-                                    layoutYs[block.id] = coords.positionInParent().y
-                                }
-                        ) {
-                            if (dragging) {
-                                AudioDropPlaceholder(Modifier.matchParentSize())
-                            }
-                            AudioBlockView(
-                                blockId = block.id,
+            document.blocks.forEachIndexed { index, block ->
+                key(block.id) {
+                    when (val payload = block.payload) {
+                        is BlockPayload.Text -> if (!hidden(index)) {
+                            TextBlockView(
                                 payload = payload,
-                                selected = interaction.selectedAudioId == block.id,
-                                playback = playback,
-                                onSelect = { onSelectAudio(block.id) },
-                                onDragStart = {
-                                    onSelectAudio(block.id)
-                                    draggingId = block.id
-                                    dragStartY = layoutYs[block.id] ?: 0f
-                                    fingerDelta = 0f
-                                    dragAccum = 0f
+                                restoreFocusGen = interaction.restoreFocusGen,
+                                isRestoreTarget = interaction.activeTextId == block.id,
+                                fillsCanvas = block.id == lastTextId,
+                                showsPlaceholder = isEmptySheet,
+                                cursor = interaction.cursors[block.id]
+                                    ?: CursorRange(payload.content.length, payload.content.length),
+                                onSelect = { onSelectText(block.id) },
+                                onTextChange = { onTextChange(block.id, it) },
+                                onCursorChange = { start, end ->
+                                    onCursorChange(block.id, start, end)
                                 },
-                                onVerticalDrag = { dy ->
-                                    fingerDelta += dy
-                                    dragAccum += dy
-                                    val steps = (dragAccum / swapThreshold).toInt()
-                                    if (steps != 0) {
-                                        onNudgeAudio(block.id, steps)
-                                        dragAccum -= steps * swapThreshold
-                                    }
-                                },
-                                onDragEnd = {
-                                    draggingId = null
-                                    fingerDelta = 0f
-                                    dragAccum = 0f
-                                },
-                                onPlayPause = { onPlayPause(block.id) },
-                                onSeek = { onSeek(block.id, it) },
-                                onRename = { onAudioNameChange(block.id, it) },
+                                onBackspaceAtStart = { onBackspaceAtStart(block.id) },
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                        }
+
+                        is BlockPayload.Audio -> {
+                            val dragging = draggingId == block.id
+                            Box(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .graphicsLayer {
-                                        this.translationY = translationY
-                                        shadowElevation = if (dragging) dragElevation else 0f
-                                        shape = RoundedCornerShape(12.dp)
-                                        clip = false
-                                        alpha = if (dragging) 0.97f else 1f
+                                    .zIndex(if (dragging) 1f else 0f)
+                                    .onGloballyPositioned { coords ->
+                                        layoutYs[block.id] = coords.positionInParent().y
                                     }
-                            )
+                            ) {
+                                if (dragging) {
+                                    AudioDropPlaceholder(Modifier.matchParentSize())
+                                }
+                                AudioBlockView(
+                                    blockId = block.id,
+                                    payload = payload,
+                                    selected = interaction.selectedAudioId == block.id,
+                                    playback = playback,
+                                    onSelect = { onSelectAudio(block.id) },
+                                    onDragStart = {
+                                        onSelectAudio(block.id)
+                                        draggingId = block.id
+                                        dragStartY = layoutYs[block.id] ?: 0f
+                                        fingerDelta = 0f
+                                        nudgeAnchor = 0f
+                                    },
+                                    onVerticalDrag = { dy ->
+                                        fingerDelta += dy
+                                        val slotY = layoutYs[block.id] ?: dragStartY
+                                        val drift = dragStartY + fingerDelta - slotY
+                                        if (drift > swapThreshold && fingerDelta > nudgeAnchor) {
+                                            onNudgeAudio(block.id, 1)
+                                            nudgeAnchor = fingerDelta
+                                        } else if (drift < -swapThreshold && fingerDelta < nudgeAnchor) {
+                                            onNudgeAudio(block.id, -1)
+                                            nudgeAnchor = fingerDelta
+                                        }
+                                    },
+                                    onDragEnd = {
+                                        draggingId = null
+                                        fingerDelta = 0f
+                                        nudgeAnchor = 0f
+                                    },
+                                    onPlayPause = { onPlayPause(block.id) },
+                                    onSeek = { onSeek(block.id, it) },
+                                    onRename = { onAudioNameChange(block.id, it) },
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .graphicsLayer {
+                                            val held = draggingId == block.id
+                                            translationY = if (held) {
+                                                dragStartY + fingerDelta -
+                                                    (layoutYs[block.id] ?: dragStartY)
+                                            } else {
+                                                0f
+                                            }
+                                            shadowElevation = if (held) dragElevation else 0f
+                                            shape = RoundedCornerShape(12.dp)
+                                            clip = false
+                                            alpha = if (held) 0.97f else 1f
+                                        }
+                                )
+                            }
                         }
                     }
                 }
             }
-        }
         }
     }
 }

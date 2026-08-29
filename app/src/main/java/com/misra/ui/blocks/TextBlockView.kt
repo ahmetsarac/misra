@@ -38,6 +38,7 @@ fun TextBlockView(
     restoreFocusGen: Int,
     isRestoreTarget: Boolean,
     fillsCanvas: Boolean,
+    showsPlaceholder: Boolean,
     cursor: CursorRange,
     onSelect: () -> Unit,
     onTextChange: (String) -> Unit,
@@ -117,7 +118,7 @@ fun TextBlockView(
                 }
             },
         decorationBox = { inner ->
-            if (field.text.isEmpty()) {
+            if (showsPlaceholder && field.text.isEmpty()) {
                 Text(
                     text = stringResource(R.string.write_a_lyric),
                     style = lyricTextStyle(fontSize),
