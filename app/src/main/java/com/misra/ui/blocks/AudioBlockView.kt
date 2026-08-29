@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.rounded.VolumeUp
 import androidx.compose.material.icons.rounded.Pause
 import androidx.compose.material.icons.rounded.PlayArrow
 import androidx.compose.material3.Icon
@@ -30,7 +29,6 @@ import com.misra.R
 import com.misra.domain.model.BlockPayload
 import com.misra.domain.model.formatDuration
 import com.misra.ui.components.SeekTrack
-import com.misra.ui.components.VolumeTrack
 import com.misra.ui.workspace.PlaybackState
 
 @Composable
@@ -40,11 +38,11 @@ fun AudioBlockView(
     selected: Boolean,
     playback: PlaybackState,
     onSelect: () -> Unit,
+    onDragStart: () -> Unit,
     onVerticalDrag: (Float) -> Unit,
     onDragEnd: () -> Unit,
     onPlayPause: () -> Unit,
     onSeek: (Long) -> Unit,
-    onVolume: (Float) -> Unit,
     onRename: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -63,7 +61,7 @@ fun AudioBlockView(
         selected = selected,
         ink = ink,
         fillColor = card,
-        onSelect = onSelect,
+        onDragStart = onDragStart,
         onVerticalDrag = onVerticalDrag,
         onDragEnd = onDragEnd,
         modifier = modifier.clickable(
@@ -117,6 +115,7 @@ fun AudioBlockView(
                 )
             }
             SeekTrack(
+                modifier = Modifier.padding(start = 8.dp),
                 positionMs = position,
                 durationMs = duration,
                 onSeek = {
@@ -126,25 +125,6 @@ fun AudioBlockView(
                 trackColor = ink.copy(alpha = 0.16f),
                 progressColor = accent
             )
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(6.dp),
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Rounded.VolumeUp,
-                    contentDescription = stringResource(R.string.volume),
-                    tint = ink.copy(alpha = 0.45f),
-                    modifier = Modifier.size(16.dp)
-                )
-                VolumeTrack(
-                    volume = playback.volume,
-                    onVolume = onVolume,
-                    trackColor = ink.copy(alpha = 0.16f),
-                    progressColor = ink.copy(alpha = 0.55f),
-                    modifier = Modifier.weight(1f)
-                )
-            }
         }
     }
 }

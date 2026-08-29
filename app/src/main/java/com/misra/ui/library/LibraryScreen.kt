@@ -28,6 +28,7 @@ import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.MusicNote
+import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -57,6 +58,7 @@ import com.misra.domain.model.SongSummary
 @Composable
 fun LibraryScreen(
     songs: List<SongSummary>,
+    onOpenSettings: () -> Unit,
     onOpenSong: (String) -> Unit,
     onCreateSong: () -> Unit,
     onDeleteSongs: (Set<String>) -> Unit,
@@ -130,19 +132,41 @@ fun LibraryScreen(
                     )
                 }
             } else {
-                Text(
-                    text = stringResource(R.string.app_name),
-                    fontFamily = FontFamily.Serif,
-                    fontWeight = FontWeight.Medium,
-                    fontSize = 32.sp,
-                    color = ink,
-                    modifier = Modifier.padding(
-                        start = 24.dp,
-                        end = 24.dp,
-                        top = 20.dp,
-                        bottom = if (songs.isEmpty()) 4.dp else 16.dp
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(
+                            start = 24.dp,
+                            end = 16.dp,
+                            top = 12.dp,
+                            bottom = if (songs.isEmpty()) 4.dp else 16.dp
+                        ),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = stringResource(R.string.app_name),
+                        fontFamily = FontFamily.Serif,
+                        fontWeight = FontWeight.Medium,
+                        fontSize = 32.sp,
+                        color = ink,
+                        modifier = Modifier.weight(1f)
                     )
-                )
+                    Box(
+                        modifier = Modifier
+                            .size(48.dp)
+                            .clip(CircleShape)
+                            .background(card)
+                            .clickable(onClick = onOpenSettings),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Rounded.Settings,
+                            contentDescription = stringResource(R.string.settings),
+                            tint = ink,
+                            modifier = Modifier.size(22.dp)
+                        )
+                    }
+                }
             }
             if (songs.isEmpty()) {
                 Text(

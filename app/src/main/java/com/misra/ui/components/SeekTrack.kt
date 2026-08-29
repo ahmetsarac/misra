@@ -29,61 +29,75 @@ fun SeekTrack(
             .height(24.dp)
             .pointerInput(durationMs) {
                 detectTapGestures { offset ->
-                    onSeek(seekFromX(offset.x, size.width.toFloat(), durationMs))
+                    onSeek(seekFromX(offset.x, size.width.toFloat(), durationMs, 5.dp.toPx()))
                 }
             }
             .pointerInput(durationMs) {
                 detectDragGestures { change, _ ->
                     change.consume()
-                    onSeek(seekFromX(change.position.x, size.width.toFloat(), durationMs))
+                    onSeek(seekFromX(change.position.x, size.width.toFloat(), durationMs, 5.dp.toPx()))
                 }
             }
     ) {
         val y = size.height / 2f
-        val start = Offset(0f, y)
-        val end = Offset(size.width, y)
+        val inset = 5.dp.toPx()
+        val startX = inset
+        val endX = size.width - inset
+        val start = Offset(startX, y)
+        val end = Offset(endX, y)
         drawLine(trackColor, start, end, strokeWidth = 3.dp.toPx(), cap = StrokeCap.Round)
-        val thumbX = size.width * fraction
-        if (thumbX > 0f) {
+        val thumbX = startX + (endX - startX) * fraction
+        if (fraction > 0f) {
             drawLine(progressColor, start, Offset(thumbX, y), strokeWidth = 3.dp.toPx(), cap = StrokeCap.Round)
         }
-        drawCircle(progressColor, radius = 5.dp.toPx(), center = Offset(thumbX, y))
+        drawCircle(progressColor, radius = inset, center = Offset(thumbX, y))
     }
 }
 
 @Composable
-fun VolumeTrack(
-    volume: Float,
-    onVolume: (Float) -> Unit,
+fun ValueTrack(
+    value: Float,
+    onValue: (Float) -> Unit,
     trackColor: Color,
     progressColor: Color,
     modifier: Modifier = Modifier
 ) {
+    val fraction = value.coerceIn(0f, 1f)
     Canvas(
         modifier = modifier
-            .height(20.dp)
+            .fillMaxWidth()
+            .height(28.dp)
             .pointerInput(Unit) {
                 detectTapGestures { offset ->
-                    onVolume((offset.x / size.width.toFloat()).coerceIn(0f, 1f))
+                    onValue(fractionFromX(offset.x, size.width.toFloat(), 5.dp.toPx()))
                 }
             }
             .pointerInput(Unit) {
                 detectDragGestures { change, _ ->
                     change.consume()
-                    onVolume((change.position.x / size.width.toFloat()).coerceIn(0f, 1f))
+                    onValue(fractionFromX(change.position.x, size.width.toFloat(), 5.dp.toPx()))
                 }
             }
     ) {
         val y = size.height / 2f
-        val start = Offset(0f, y)
-        drawLine(trackColor, start, Offset(size.width, y), strokeWidth = 2.5.dp.toPx(), cap = StrokeCap.Round)
-        val thumbX = size.width * volume.coerceIn(0f, 1f)
-        drawLine(progressColor, start, Offset(thumbX, y), strokeWidth = 2.5.dp.toPx(), cap = StrokeCap.Round)
-        drawCircle(progressColor, radius = 4.dp.toPx(), center = Offset(thumbX, y))
+        val inset = 5.dp.toPx()
+        val startX = inset
+        val endX = size.width - inset
+        val start = Offset(startX, y)
+        drawLine(trackColor, start, Offset(endX, y), strokeWidth = 3.dp.toPx(), cap = StrokeCap.Round)
+        val thumbX = startX + (endX - startX) * fraction
+        if (fraction > 0f) {
+            drawLine(progressColor, start, Offset(thumbX, y), strokeWidth = 3.dp.toPx(), cap = StrokeCap.Round)
+        }
+        drawCircle(progressColor, radius = inset, center = Offset(thumbX, y))
     }
 }
 
-private fun seekFromX(x: Float, width: Float, durationMs: Long): Long {
-    val fraction = if (width <= 0f) 0f else (x / width).coerceIn(0f, 1f)
-    return (fraction * durationMs).toLong()
+private fun seekFromX(x: Float, width: Float, durationMs: Long, inset: Float): Long {
+    return (fractionFromX(x, width, inset) * durationMs).toLong()
+}
+
+private fun fractionFromX(x: Float, width: Float, inset: Float): Float {
+    val usable = (width - inset * 2f).coerceAtLeast(1f)
+    return ((x - inset) / usable).coerceIn(0f, 1f)
 }

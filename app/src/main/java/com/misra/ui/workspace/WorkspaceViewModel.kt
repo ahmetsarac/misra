@@ -52,8 +52,7 @@ data class PlaybackState(
     val blockId: String? = null,
     val isPlaying: Boolean = false,
     val positionMs: Long = 0L,
-    val durationMs: Long = 0L,
-    val volume: Float = 1f
+    val durationMs: Long = 0L
 )
 
 data class RecordingUiState(
@@ -278,7 +277,6 @@ class WorkspaceViewModel(
             return
         }
         val startFrom = if (current.blockId == blockId) current.positionMs else 0L
-        player.setVolume(current.volume)
         runCatching {
             player.play(file, startFrom)
             _playback.update {
@@ -308,12 +306,6 @@ class WorkspaceViewModel(
                 durationMs = player.durationMs.takeIf { d -> d > 0 } ?: audio.durationMs
             )
         }
-    }
-
-    fun onVolume(volume: Float) {
-        val v = volume.coerceIn(0f, 1f)
-        player.setVolume(v)
-        _playback.update { it.copy(volume = v) }
     }
 
     fun saveNow() {

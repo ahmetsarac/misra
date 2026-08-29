@@ -24,7 +24,8 @@
     <string name="stop">Stop</string>
     <string name="discard">Discard</string>
     <string name="play">Play</string>
-    <string name="volume">Volume</string>
+    <string name="settings">Settings</string>
+    <string name="font_size">Font size</string>
     <string name="drag_block">Move</string>
     <string name="resize_block">Resize</string>
     <string name="audio_missing">Audio file is missing.</string>

@@ -52,11 +52,6 @@ class AppAudioPlayer {
         player?.seekTo(positionMs.toInt().coerceAtLeast(0))
     }
 
-    fun setVolume(volume: Float) {
-        val v = volume.coerceIn(0f, 1f)
-        player?.setVolume(v, v)
-    }
-
     fun reset() {
         runCatching {
             player?.reset()

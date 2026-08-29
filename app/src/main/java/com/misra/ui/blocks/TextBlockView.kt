@@ -28,7 +28,8 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import com.misra.R
 import com.misra.domain.model.BlockPayload
-import com.misra.ui.theme.LyricTextStyle
+import com.misra.ui.theme.LocalLyricFontSize
+import com.misra.ui.theme.lyricTextStyle
 import com.misra.ui.workspace.CursorRange
 
 @Composable
@@ -46,6 +47,7 @@ fun TextBlockView(
 ) {
     val ink = MaterialTheme.colorScheme.onBackground
     val accent = MaterialTheme.colorScheme.primary
+    val fontSize = LocalLyricFontSize.current
     val focusRequester = remember { FocusRequester() }
     var field by remember {
         mutableStateOf(
@@ -92,7 +94,7 @@ fun TextBlockView(
             if (next.text != payload.content) onTextChange(next.text)
             onCursorChange(next.selection.start, next.selection.end)
         },
-        textStyle = LyricTextStyle.copy(color = ink),
+        textStyle = lyricTextStyle(fontSize).copy(color = ink),
         cursorBrush = SolidColor(accent),
         modifier = modifier
             .fillMaxWidth()
@@ -118,7 +120,7 @@ fun TextBlockView(
             if (field.text.isEmpty()) {
                 Text(
                     text = stringResource(R.string.write_a_lyric),
-                    style = LyricTextStyle,
+                    style = lyricTextStyle(fontSize),
                     color = ink.copy(alpha = 0.32f)
                 )
             }

@@ -84,7 +84,6 @@ fun WorkspaceRoute(
         onAudioNameChange = viewModel::onUpdateAudioName,
         onPlayPause = viewModel::onPlayPause,
         onSeek = viewModel::onSeek,
-        onVolume = viewModel::onVolume,
         onImportAudio = viewModel::onImportAudio,
         onStartRecording = viewModel::startRecording,
         onPermissionDenied = viewModel::onPermissionDenied,
@@ -115,7 +114,6 @@ fun WorkspaceScreen(
     onAudioNameChange: (String, String) -> Unit,
     onPlayPause: (String) -> Unit,
     onSeek: (String, Long) -> Unit,
-    onVolume: (Float) -> Unit,
     onImportAudio: (android.net.Uri) -> Unit,
     onStartRecording: () -> Unit,
     onPermissionDenied: () -> Unit,
@@ -153,7 +151,6 @@ fun WorkspaceScreen(
             onAudioNameChange = onAudioNameChange,
             onPlayPause = onPlayPause,
             onSeek = onSeek,
-            onVolume = onVolume,
             modifier = Modifier.fillMaxSize()
         )
         WorkspaceChrome(

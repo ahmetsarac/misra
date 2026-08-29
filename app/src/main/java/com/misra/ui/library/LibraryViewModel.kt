@@ -18,7 +18,8 @@ import kotlinx.coroutines.withContext
 
 data class LibraryState(
     val songs: List<SongSummary> = emptyList(),
-    val openSongId: String? = null
+    val openSongId: String? = null,
+    val settingsOpen: Boolean = false
 )
 
 class LibraryViewModel(application: Application) : AndroidViewModel(application) {
@@ -44,12 +45,20 @@ class LibraryViewModel(application: Application) : AndroidViewModel(application)
     }
 
     fun openSong(id: String) {
-        _state.update { it.copy(openSongId = id) }
+        _state.update { it.copy(openSongId = id, settingsOpen = false) }
     }
 
     fun closeSong() {
         _state.update { it.copy(openSongId = null) }
         refresh()
+    }
+
+    fun openSettings() {
+        _state.update { it.copy(settingsOpen = true) }
+    }
+
+    fun closeSettings() {
+        _state.update { it.copy(settingsOpen = false) }
     }
 
     fun createSong() {
