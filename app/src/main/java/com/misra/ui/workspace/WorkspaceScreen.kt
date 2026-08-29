@@ -47,7 +47,10 @@ fun WorkspaceRoute(
     val lifecycleOwner = LocalLifecycleOwner.current
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
-            if (event == Lifecycle.Event.ON_STOP) viewModel.saveNow()
+            if (event == Lifecycle.Event.ON_STOP) {
+                viewModel.pausePlayback()
+                viewModel.saveNow()
+            }
         }
         lifecycleOwner.lifecycle.addObserver(observer)
         onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }

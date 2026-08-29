@@ -309,6 +309,14 @@ class WorkspaceViewModel(
         }
     }
 
+    // Android 17 blocks audio from apps without a visible activity, so playback stops with the UI.
+    fun pausePlayback() {
+        if (!_playback.value.isPlaying) return
+        player.pause()
+        playbackTicker?.cancel()
+        _playback.update { it.copy(isPlaying = false, positionMs = player.positionMs) }
+    }
+
     fun saveNow() {
         settleRecording()
         val snapshot = _document.value

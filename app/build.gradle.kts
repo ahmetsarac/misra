@@ -32,16 +32,14 @@ val canSignRelease = releaseStoreFile != null &&
 android {
     namespace = "com.misra"
     compileSdk {
-        version = release(36) {
-            minorApiLevel = 1
-        }
+        version = release(37)
     }
 
     defaultConfig {
         applicationId = "com.misra"
         minSdk = 29
-        targetSdk = 36
-        versionCode = 3
+        targetSdk = 37
+        versionCode = 4
         versionName = "0.0.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
